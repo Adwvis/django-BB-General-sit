@@ -27,7 +27,7 @@ services:
     container_name: backend-bb
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/app
+      - ./core:/app
     ports:
       - "8000:8000"
     environment:
@@ -48,7 +48,7 @@ services:
     container_name: celery-worker-bb
     command: celery -A core worker --loglevel=info
     volumes:
-      - .:/app
+      - ./core:/app
     environment:
       - SECRET_KEY=test
       - CELERY_BROKER_URL=redis://redis-bb:6379/0
@@ -66,7 +66,7 @@ services:
     container_name: celery-beat-bb
     command: celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     volumes:
-      - .:/app
+      - ./core:/app
     environment:
       - SECRET_KEY=test
       - CELERY_BROKER_URL=redis://redis-bb:6379/0
