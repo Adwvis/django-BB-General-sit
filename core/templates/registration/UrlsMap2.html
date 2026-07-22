@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+<h2>صفحات در دسترس شما</h2>
+<ul>
+  {% for link in links %}
+    <li><a href="{{ link.url }}">{{ link.label }}</a></li>
+  {% empty %}
+    <li>هیچ صفحه‌ای برای شما تعریف نشده است.</li>
+  {% endfor %}
+</ul>
+<form method="post" action="{% url 'accounts:logout' %}">
+    {% csrf_token %}
+    <button type="submit">خروج</button>
+</form>
+
+</body>
+</html>

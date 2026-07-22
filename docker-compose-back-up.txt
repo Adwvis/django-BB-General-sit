@@ -1,0 +1,86 @@
+version: "3.9"
+
+services:
+  postgres-bb:
+    container_name: postgres-bb
+    image: docker.arvancloud.ir/postgres:16
+    # restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres-bb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: tt123456
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis-bb:
+    container_name: redis-bb
+    image: docker.arvancloud.ir/redis
+    # restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    depends_on:
+      - postgres-bb
+
+  backend-bb:
+    build: .
+    container_name: backend-bb
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./core:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=test
+      - DEBUG=True
+      - CELERY_BROKER_URL=redis://redis-bb:6379/0
+      - DB_NAME=postgres-bb
+      - DB_USER=admin
+      - DB_PASSWORD=tt123456
+      - DB_HOST=postgres-bb
+      - DB_PORT=5432
+    depends_on:
+      - redis-bb
+      - postgres-bb
+
+  celery-worker:
+    build: .
+    container_name: celery-worker-bb
+    command: watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A core worker --loglevel=info
+    volumes:
+      - ./core:/app
+    environment:
+      - SECRET_KEY=test
+      - CELERY_BROKER_URL=redis://redis-bb:6379/0
+      - DB_NAME=postgres-bb
+      - DB_USER=admin
+      - DB_PASSWORD=tt123456
+      - DB_HOST=postgres-bb
+      - DB_PORT=5432
+    depends_on:
+      - redis-bb
+      - postgres-bb
+
+  celery-beat:
+    build: .
+    container_name: celery-beat-bb
+    command: watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./core:/app
+    environment:
+      - SECRET_KEY=test
+      - CELERY_BROKER_URL=redis://redis-bb:6379/0
+      - DB_NAME=postgres-bb
+      - DB_USER=admin
+      - DB_PASSWORD=tt123456
+      - DB_HOST=postgres-bb
+      - DB_PORT=5432
+    depends_on:
+      - redis-bb
+      - postgres-bb
+
+
+volumes:
+  postgres_data:

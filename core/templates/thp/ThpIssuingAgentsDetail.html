@@ -1,0 +1,607 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Edit Agent | Dashboard</title>
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+
+    <style>
+        :root {
+            --bg-1: #050816;
+            --bg-2: #0b1020;
+            --card: rgba(255, 255, 255, 0.06);
+            --card-strong: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.12);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --primary: #8b5cf6;
+            --primary-2: #22d3ee;
+            --danger: #fb7185;
+            --success: #34d399;
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+            --radius: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            min-height: 100%;
+        }
+
+        body {
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.18), transparent 28%),
+                radial-gradient(circle at 90% 10%, rgba(34, 211, 238, 0.12), transparent 24%),
+                radial-gradient(circle at 50% 100%, rgba(59, 130, 246, 0.12), transparent 30%),
+                linear-gradient(160deg, var(--bg-1), var(--bg-2));
+            overflow-x: hidden;
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            inset: auto;
+            width: 380px;
+            height: 380px;
+            border-radius: 50%;
+            filter: blur(70px);
+            opacity: 0.22;
+            pointer-events: none;
+            z-index: 0;
+            animation: floatGlow 12s ease-in-out infinite;
+        }
+
+        body::before {
+            top: -120px;
+            left: -120px;
+            background: var(--primary);
+        }
+
+        body::after {
+            right: -120px;
+            bottom: -120px;
+            background: var(--primary-2);
+            animation-delay: -6s;
+        }
+
+        @keyframes floatGlow {
+            0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+            50% { transform: translate3d(25px, 15px, 0) scale(1.08); }
+        }
+
+        .page-wrap {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            padding: 32px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .glass-shell {
+            width: min(1100px, 100%);
+            background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+            border: 1px solid var(--border);
+            border-radius: calc(var(--radius) + 8px);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            overflow: hidden;
+            animation: riseIn 700ms ease both;
+        }
+
+        @keyframes riseIn {
+            from {
+                opacity: 0;
+                transform: translateY(18px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .hero {
+            padding: 28px 28px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background:
+                linear-gradient(135deg, rgba(139, 92, 246, 0.14), rgba(34, 211, 238, 0.06)),
+                rgba(255, 255, 255, 0.02);
+        }
+
+        .hero-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--muted);
+            font-size: 13px;
+            letter-spacing: 0.02em;
+        }
+
+        .eyebrow::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
+        }
+
+        .title {
+            margin-top: 14px;
+            font-size: clamp(26px, 3vw, 38px);
+            font-weight: 700;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+        }
+
+        .subtitle {
+            margin-top: 10px;
+            max-width: 760px;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .content {
+            padding: 28px;
+        }
+
+        .form-card {
+            background: rgba(8, 12, 24, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        .field label,
+        .field .label {
+            color: #e2e8f0;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+
+        .field input[type="text"],
+        .field input[type="number"],
+        .field input[type="time"],
+        .field textarea,
+        .field select {
+            width: 100%;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 16px;
+            padding: 14px 16px;
+            outline: none;
+            transition: 0.25s ease;
+            box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.0);
+        }
+
+        .field input::placeholder,
+        .field textarea::placeholder {
+            color: rgba(148, 163, 184, 0.75);
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            border-color: rgba(139, 92, 246, 0.55);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.16);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .field input[type="time"] {
+            min-height: 52px;
+        }
+
+        .help-error {
+            color: #fda4af;
+            font-size: 13px;
+            margin-top: -2px;
+        }
+
+        .section-title {
+            margin: 8px 0 14px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #f8fafc;
+            letter-spacing: 0.01em;
+        }
+
+        .multi-box,
+        .company-box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 16px;
+        }
+
+        /* Django checkbox groups */
+        #id_working_category,
+        #id_working_days,
+        #id_working_insurance_company {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        #id_working_category > div,
+        #id_working_days > div,
+        #id_working_insurance_company > div {
+            display: flex;
+            align-items: center;
+        }
+
+        #id_working_category label,
+        #id_working_days label,
+        #id_working_insurance_company label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #e2e8f0;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s ease;
+            user-select: none;
+        }
+
+        #id_working_category label:hover,
+        #id_working_days label:hover,
+        #id_working_insurance_company label:hover {
+            transform: translateY(-1px);
+            border-color: rgba(139, 92, 246, 0.35);
+            background: rgba(139, 92, 246, 0.10);
+        }
+
+        #id_working_category input,
+        #id_working_days input,
+        #id_working_insurance_company input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+            margin: 0;
+        }
+
+        /* Checkboxes */
+        .switch-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .check-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: 0.2s ease;
+        }
+
+        .check-card:hover {
+            transform: translateY(-1px);
+            border-color: rgba(34, 211, 238, 0.25);
+        }
+
+        .check-card label {
+            margin: 0;
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+
+        .check-card input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-2);
+        }
+
+        /* Button */
+        .actions {
+            margin-top: 22px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-glass {
+            min-width: 180px;
+            border: 0;
+            border-radius: 16px;
+            padding: 14px 20px;
+            color: white;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            box-shadow: 0 14px 30px rgba(124, 58, 237, 0.28);
+            transition: 0.25s ease;
+        }
+
+        .btn-glass:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+            box-shadow: 0 18px 36px rgba(124, 58, 237, 0.34);
+        }
+
+        .btn-secondary-glass {
+            border: 1px solid rgba(255,255,255,0.10);
+            background: rgba(255,255,255,0.05);
+            color: var(--text);
+            border-radius: 16px;
+            padding: 14px 20px;
+            text-decoration: none;
+            transition: 0.25s ease;
+        }
+
+        .btn-secondary-glass:hover {
+            background: rgba(255,255,255,0.08);
+            color: var(--text);
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        /* Django error list */
+        .errorlist {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            color: #fda4af;
+            font-size: 13px;
+        }
+
+        @media (max-width: 992px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .switch-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .content {
+                padding: 18px;
+            }
+
+            .hero {
+                padding: 22px 18px 16px;
+            }
+
+            .form-card {
+                padding: 18px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .page-wrap {
+                padding: 12px;
+            }
+
+            .glass-shell {
+                border-radius: 20px;
+            }
+
+            .title {
+                font-size: 24px;
+            }
+
+            .subtitle {
+                font-size: 14px;
+            }
+
+            .btn-glass,
+            .btn-secondary-glass {
+                width: 100%;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            #id_working_category label,
+            #id_working_days label,
+            #id_working_insurance_company label {
+                width: 100%;
+                justify-content: flex-start;
+                border-radius: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-wrap">
+        <div class="glass-shell">
+            <div class="hero">
+                <div class="hero-top">
+                    <div class="eyebrow">Admin Panel / Edit Agent</div>
+                </div>
+                <h1 class="title">Edit Agent</h1>
+                <p class="subtitle">
+                    Update agent details, working schedule, categories, companies, and status with a clean luxury interface.
+                </p>
+            </div>
+
+            <div class="content">
+                <div class="form-card">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="help-error mb-3">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="form-grid">
+                            <div class="field full">
+                                <label for="person_name">Name</label>
+                                <input
+                                    id="person_name"
+                                    name="person_name"
+                                    type="text"
+                                    required
+                                    value="{{ form.person_name.value|default_if_none:'' }}"
+                                    placeholder="Enter agent name"
+                                />
+                                {% if form.person_name.errors %}
+                                    <div class="help-error">{{ form.person_name.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="field">
+                                <label for="capacity">Capacity</label>
+                                <input
+                                    id="capacity"
+                                    name="capacity"
+                                    type="number"
+                                    required
+                                    value="{{ form.capacity.value|default_if_none:'' }}"
+                                    placeholder="0"
+                                />
+                                {% if form.capacity.errors %}
+                                    <div class="help-error">{{ form.capacity.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="field">
+                                <label for="start_shift">Start Shift</label>
+                                <input
+                                    id="start_shift"
+                                    name="start_shift"
+                                    type="time"
+                                    value="{{ form.start_shift.value|time:'H:i' }}"
+                                />
+                                {% if form.start_shift.errors %}
+                                    <div class="help-error">{{ form.start_shift.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="field">
+                                <label for="end_shift">End Shift</label>
+                                <input
+                                    id="end_shift"
+                                    name="end_shift"
+                                    type="time"
+                                    required
+                                    value="{{ form.end_shift.value|time:'H:i' }}"
+                                />
+                                {% if form.end_shift.errors %}
+                                    <div class="help-error">{{ form.end_shift.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="field full">
+                                <div class="section-title">Working Category</div>
+                                <div class="multi-box">
+                                    {{ form.working_category }}
+                                </div>
+                                {% if form.working_category.errors %}
+                                    <div class="help-error">{{ form.working_category.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="field full">
+                                <div class="section-title">Working Days</div>
+                                <div class="multi-box">
+                                    {{ form.working_days }}
+                                </div>
+                                {% if form.working_days.errors %}
+                                    <div class="help-error">{{ form.working_days.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="field full">
+                                <div class="section-title">Insurance Company</div>
+                                <div class="company-box">
+                                    {{ form.working_insurance_company }}
+                                </div>
+                                {% if form.working_insurance_company.errors %}
+                                    <div class="help-error">{{ form.working_insurance_company.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="field full">
+                                <div class="section-title">Status</div>
+                                <div class="switch-grid">
+                                    <div class="check-card">
+                                        <label for="id_is_working">Is Working</label>
+                                        {{ form.is_working }}
+                                    </div>
+                                    <div class="check-card">
+                                        <label for="id_is_visible">Is Visible</label>
+                                        {{ form.is_visible }}
+                                    </div>
+                                </div>
+                                {% if form.is_working.errors %}
+                                    <div class="help-error">{{ form.is_working.errors }}</div>
+                                {% endif %}
+                                {% if form.is_visible.errors %}
+                                    <div class="help-error">{{ form.is_visible.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="actions">
+                            <a href="javascript:history.back()" class="btn-secondary-glass">Cancel</a>
+                            <button type="submit" class="btn-glass">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+</body>
+</html>

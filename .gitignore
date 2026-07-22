@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environment
+venv/
+env/
+.venv/
+ENV/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-3
+media/
+
+# Environment variables (خیلی مهم - حاوی رمزها و کلیدهاست)
+.env
+.env.*
+
+# Static files (اگه با collectstatic جمع میشن)
+staticfiles/
+static_root/
+
+# Docker
+*.pid
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+
+# Migrations (اختیاری - بعضی‌ها ترجیح میدن این رو track نکنن، ولی معمولاً بهتره track کنی)
+# اگه می‌خوای migrations رو ignore کنی خط زیر رو از کامنت در بیار:
+*/migrations/*.py
+!*/migrations/__init__.py
+
+
+data.json
+db_backup.json

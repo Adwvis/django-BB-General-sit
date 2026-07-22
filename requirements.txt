@@ -1,0 +1,68 @@
+Django>=5.0,<5.2
+python-decouple
+Pillow
+djangorestframework
+markdown
+django-filter
+drf-yasg
+drf-yasg[validation]
+djangorestframework-simplejwt
+djoser
+black # black .
+flake8
+pytest
+pytest-django
+Faker
+# couldent find django-cors-header in iraninan mirrors
+django-cors-headers
+celery
+redis
+django-celery-beat
+django-redis
+httpx
+
+# findstr /s /r "\<ThpIssuingOrder\>" *.py
+# findstr /s /i "ThpIssuingOrder" *.py
+# docker compose exec backend-bb sh -c "rm db.sqlite3 && python manage.py migrate"
+# docker compose exec backend-bb sh -c "python manage.py createsuperuser"
+# docker compose exec backend-bb sh -c "python manage.py startapp orders"
+# docker-compose exec backend sh -c "pip install -r requirements.txt"
+# docker-compose exec backend sh -c "pip install djangorestframework"
+# docker-compose exec backend sh -c "pip install --trusted-host https://mirror-pypi.runflare.com -i https://mirror-pypi.runflare.com/simple/ markdown"
+
+
+# docker-compose exec backend-bb sh -c "python manage.py shell"
+# from thirdparty.models import ThpIssuingInPaidOrders
+# ThpIssuingInPaidOrder.objects.all().delete()
+
+# docker-compose exec backend-bb sh -c "python manage.py order_detail_test"
+# Ctrl+Shift+H search in vs code
+
+
+# docker-compose exec backend-bb sh -c "python manage.py dumpdata --natural-foreign --natural-primary --exclude=contenttypes --exclude=auth.permission -o db_backup.json"
+# docker-compose exec backend-bb python manage.py migrate
+# docker cp db_backup.json backend-bb:/app/db_backup.json # برای کار کردن این کد باید فایل مورد نظر کنار داکرکامپوز باشه
+# docker-compose exec backend-bb python manage.py loaddata /app/db_backup.json 
+
+
+# flatpak run org.pgadmin.pgadmin4
+
+# grep -r "logout" . --include="*.py" -l
+
+# «یه HTML خیلی مدرن و خوشگل»
+# «RTL و فارسی»
+# «مناسب Django/Jinja»
+# «با تم شیشه‌ای / مینیمال / لوکس»
+# «برای چه صفحه‌ایه» مثل: داشبورد، لاگین، لیست، پروفایل، فرم
+# من می‌تونم همون حس و کیفیت رو برات بسازم.
+
+# اگر بخوای، این قالب پرامپت رو هم دفعه بعد استفاده کن:
+
+# text
+# یه HTML خیلی مدرن، شیک و حرفه‌ای برام بساز برای [نام صفحه].
+# زبان: فارسی
+# جهت: RTL
+# سبک: [مثلاً glassmorphism / dark / minimal / luxury]
+# سازگار با Django template باشه.
+# ریسپانسیو باشه و برای موبایل هم خوب دیده بشه.
+# اگر میشه انیمیشن و طراحی خیلی تمیز هم داشته باشه.

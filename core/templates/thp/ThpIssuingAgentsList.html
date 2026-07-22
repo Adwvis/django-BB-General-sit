@@ -1,0 +1,328 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Dashboard | Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #7c3aed;
+            --bg-dark: #080c1b;
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem;
+            background-image: radial-gradient(circle at 10% 20%, rgba(124, 58, 237, 0.15), transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.1), transparent 40%);
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem 2rem;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Search Input */
+        #searchInput {
+            width: 100%;
+            padding: 12px 20px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        /* Table Wrapper */
+        .table-container {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            padding: 2rem;
+            overflow-x: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 1rem; color: var(--text-dim); font-weight: 500; cursor: pointer; border-bottom: 1px solid var(--glass-border); white-space: nowrap; }
+        td { padding: 1.2rem 1rem; border-bottom: 1px solid var(--glass-border); font-size: 0.95rem; }
+        
+        tr:hover { background: rgba(255,255,255,0.03); }
+
+        /* Status & Buttons */
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        .bg-success { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+        .bg-danger { background: #ef4444; }
+        
+        .text-btn { background: none; border: none; color: #94a3b8; cursor: pointer; transition: 0.2s; }
+        .text-btn:hover { color: var(--primary); text-decoration: underline; }
+
+        /* Dropdown */
+        .company-dropdown { 
+            background: #111827; 
+            padding: 10px; 
+            border-radius: 10px; 
+            border: 1px solid var(--glass-border);
+            position: absolute;
+            z-index: 100;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="page-header">
+        <h5>Welcome back, <strong>{{ user }}</strong></h5>
+        <h2 style="font-size: 1.2rem; color: var(--primary);">Issuing Agent List</h2>
+    </div>
+
+    <input type="text" id="searchInput" placeholder="Search agents by name, capacity, company...">
+
+    <div class="table-container">
+        <table id="myTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Name ↕</th>
+                    <th onclick="sortTable(1)">Capacity ↕</th>
+                    <th onclick="sortTable(2)">StartShift ↕</th>
+                    <th onclick="sortTable(3)">EndShift ↕</th>
+                    <th onclick="sortTable(4)">Category ↕</th>
+                    <th onclick="sortTable(5)">WorkingDays ↕</th>
+                    <th onclick="sortTable(6)">Company ↕</th>
+                    <th onclick="sortTable(7)">Status ↕</th>
+                </tr>
+            </thead>
+            <tbody id="post-wrapper">
+                <!-- JS handles this -->
+            </tbody>
+        </table>
+    </div>
+    <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+    <!-- sreach -->
+    <script>
+        document.getElementById("searchInput").addEventListener("keyup", function () {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll("#myTable tr");
+
+            rows.forEach((row, index) => {
+                // رد کردن هدر جدول
+                if (index === 0) return;
+
+                let text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? "" : "none";
+            });
+        });
+    </script>
+    <!-- sort -->
+    <script>
+        let sortDirection = {};
+
+        function sortTable(colIndex) {
+            const table = document.getElementById("myTable");
+            const tbody = table.tBodies[0];
+            const rows = Array.from(tbody.rows);
+            const headers = table.querySelectorAll("th"); // 👈 اینو اضافه کن
+
+            // ریست همه آیکن‌ها
+            headers.forEach(th => {
+                const icon = th.querySelector(".sort-icon");
+                if (icon) icon.textContent = "↕";
+            });
+
+            // تعیین جهت سورت
+            sortDirection[colIndex] = !sortDirection[colIndex];
+            const direction = sortDirection[colIndex] ? 1 : -1;
+
+            // 👇 اینجا بذارش (بعد از تعیین direction)
+            const currentIcon = headers[colIndex].querySelector(".sort-icon");
+            if (currentIcon) {
+                currentIcon.textContent = direction === 1 ? "↑" : "↓";
+            }
+
+            rows.sort((a, b) => {
+                let valA = a.cells[colIndex].innerText.trim();
+                let valB = b.cells[colIndex].innerText.trim();
+
+                if (!isNaN(valA) && !isNaN(valB)) {
+                    return (valA - valB) * direction;
+                }
+
+                return valA.localeCompare(valB) * direction;
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    </script>
+
+
+<!-- API -->
+<script>
+let companyCache = false;
+
+async function loadCompanies() {
+    if (companyCache) return companyCache;
+    const res = await fetch('/accounts/api/v1/WorkingInsuranceCompanies/');
+    const data = await res.json();
+    console.log(data); // ببین چی برمیگردونه
+    companyCache = data;
+    return companyCache;
+}
+
+async function loadThpIssuingAgent() {
+    try {
+         // اول کمپانی‌ها رو لود کن
+
+        const response = await fetch("/accounts/api/v1/ThpIssuingAgent/");
+        if (!response.ok) throw new Error("Network response was not ok");
+
+        const data = await response.json();
+        const wrapper = document.getElementById('post-wrapper');
+
+        wrapper.innerHTML = data.map(agent => `
+            <tr>
+                <td>
+                    <a style="text-decoration: none; color:inherit;"
+                    href="/thirdparty/EditIssuingAgent/${agent.id}/">
+                    <b>${agent.person_name || agent.profile_user}</b>
+                    </a>
+                    </td>
+                <td>${agent.capacity}/${agent.assigned_order}</td>
+                <td>${agent.start_shift}</td>
+                <td>${agent.end_shift}</td>
+                <td>${agent.working_category_names.join(', ')}</td>
+                <td>${agent.working_days_names.join(', ')}</td>
+                <td>
+                    <span>${agent.working_insurance_company_names.join(', ')}</span>
+                    <span class="company-arrow" 
+                          data-agent-id="${agent.id}"
+                          data-agent-companies='${agent.working_insurance_company_names.join(' ')}'
+                          onclick="toggleCompanyList(this)" 
+                          style="cursor:pointer; margin-right:6px;">&#9660;</span>
+                    <div class="company-dropdown" style="display:none; flex-wrap:wrap; margin-top:4px;"></div>
+                </td>
+                <td>
+                    <div class="tm-status-circle ${agent.is_working ? 'bg-success' : 'bg-danger'}" 
+                        style="width:15px; height:15px; margin:0;">
+                    </div>
+                    <button onclick="toggleWorking(${agent.id}, ${agent.is_working})" class='text-btn'>
+                        ${agent.is_working ? 'On' : 'Off'}
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+    } catch (error) { console.error("Error:", error); }
+}
+
+async function toggleCompanyList(arrowEl) {
+    const dropdown = arrowEl.nextElementSibling;
+    const isVisible = dropdown.style.display === 'flex';
+
+    if (isVisible) {
+        dropdown.style.display = 'none';
+        arrowEl.textContent = '▼';
+        return;
+    }
+    
+    const working_companies = arrowEl.dataset.agentCompanies;
+    const agentId = arrowEl.dataset.agentId;  // ← اضافه شد
+
+    const all_companies = await loadCompanies();
+
+    dropdown.innerHTML = all_companies.map(c =>
+        `<label style="margin:2px 6px; display:flex; align-items:center; gap:4px; cursor:pointer;">
+            <input type="checkbox" value="${c.id}" ${working_companies.includes(c.name) ? 'checked' : ''}>
+            ${c.name}
+        </label>`
+    ).join('') + `
+        <button onclick="saveCompanies(${agentId}, this)" 
+            style="margin:6px; padding:4px 12px; cursor:pointer;">
+            ذخیره
+        </button>`;
+
+    dropdown.style.display = 'flex';
+    arrowEl.textContent = '▲';
+}
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+async function saveCompanies(agentId, btn) {
+    const dropdown = btn.parentElement; // instead of btn.closest('.company-dropdown')
+    const checked = [...dropdown.querySelectorAll('input[type=checkbox]:checked')]
+        .map(cb => parseInt(cb.value));
+        
+    const res = await fetch(`/accounts/api/v1/ThpIssuingAgent/${agentId}/`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({ working_insurance_company: checked }),
+    });
+
+    if (res.ok) {
+        loadThpIssuingAgent()
+    } else {
+        alert('Error in Saving Companies');
+    }
+}
+
+async function toggleWorking(id, currentStatus) {
+        const csrfToken = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+    
+        const response = await fetch(`/accounts/api/v1/ThpIssuingAgent/${id}/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({ is_working: !currentStatus }),
+        });
+    
+        if (response.ok) {
+            loadThpIssuingAgent(); 
+        }
+    }
+
+loadThpIssuingAgent()
+// loadCompanies()
+</script>
+
+</body>
+
+</html>
