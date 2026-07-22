@@ -15,7 +15,7 @@ jobs:
       - name: push image to docker hub
         run: |
           docker login -u Adwvis -p ${{ secrets.DOCKER_HUB_TOKEN }}
-          docker push Adwvis/django-BB-General-sit:latest 
+          docker push Adwvis/django-bb-General-sit:latest 
 
       # - name: Log in to Docker Hub
       #   uses: docker/login-action@v3
