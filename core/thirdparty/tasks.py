@@ -775,7 +775,7 @@ def preassing():
             )
 
         else:
-            
+
             right_agents = (
                 ProfileThpIssuingAgent.objects
                 .filter(working_insurance_company__name=item.company_name)
@@ -1023,28 +1023,28 @@ def thp_issuing_assignment():
     finally:
         lock.release()
 
-async def test_print():
+# async def test_print():
     
-    from datetime import datetime
-    print(f"time is {datetime.now()} -----------------")
+#     from datetime import datetime
+#     print(f"time is {datetime.now()} -----------------")
 
-# @shared_task(bind=True)
-def thp_issuing_assignment_bind(self):
+# # @shared_task(bind=True)
+# def thp_issuing_assignment_bind(self):
 
-    lock = redis_client.lock(
-        "thp_issuing_assignment_bind",
-        timeout=10,
-        blocking=False,
-    )
+#     lock = redis_client.lock(
+#         "thp_issuing_assignment_bind",
+#         timeout=10,
+#         blocking=False,
+#     )
 
-    if not lock.acquire():
-        self.apply_async(countdown=5)
-        return
-    check_condition_from_db = False
-    try:
-        if check_condition_from_db:
-            asyncio.run(test_print())
-    finally:
-        lock.release()
+#     if not lock.acquire():
+#         self.apply_async(countdown=5)
+#         return
+#     check_condition_from_db = False
+#     try:
+#         if check_condition_from_db:
+#             asyncio.run(test_print())
+#     finally:
+#         lock.release()
 
-    self.apply_async(countdown=5)
+#     self.apply_async(countdown=5)
