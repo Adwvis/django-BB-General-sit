@@ -66,3 +66,16 @@ httpx
 # سازگار با Django template باشه.
 # ریسپانسیو باشه و برای موبایل هم خوب دیده بشه.
 # اگر میشه انیمیشن و طراحی خیلی تمیز هم داشته باشه.
+
+
+# first time --------
+# git add .
+# git commit -m "Initial commit"
+# git branch -M main
+# git remote add origin https://github.com/USERNAME/my-django-app.git
+# git push -u origin main
+
+# update ------------
+# git add .
+# git commit -m "توضیح کوتاه تغییرات"
+# git push
