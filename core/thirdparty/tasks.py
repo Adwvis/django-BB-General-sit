@@ -775,6 +775,7 @@ def preassing():
             )
 
         else:
+            
             right_agents = (
                 ProfileThpIssuingAgent.objects
                 .filter(working_insurance_company__name=item.company_name)
