@@ -572,6 +572,7 @@ def agents_issuing_counts():
 async def chang_state_in_back_office_to_paid(item,client,semaphore,bb_login_csrftoken):
     async with semaphore:
         try:
+            print("start chang_state_in_back_office_to_paid")
             change_state_url= f"https://bimebazar.com/panel/orders/change-state/{item.uid}/"
             change_state_data = {
             "csrfmiddlewaretoken": bb_login_csrftoken,
