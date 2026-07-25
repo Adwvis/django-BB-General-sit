@@ -11,8 +11,11 @@ services:
       POSTGRES_DB: postgres-bb
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: tt123456
+      TZ: Asia/Tehran
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
 
   redis-bb:
     container_name: redis-bb
@@ -21,6 +24,11 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --save 60 1 --loglevel warning
+    environment:
+      - TZ=Asia/Tehran
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
       - postgres-bb
 
@@ -32,11 +40,14 @@ services:
       - ./core:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     ports:
       - "8000"
     environment:
       - SECRET_KEY=test
       - DEBUG=True
+      - TZ=Asia/Tehran
       - CELERY_BROKER_URL=redis://redis-bb:6379/0
       - DB_NAME=postgres-bb
       - DB_USER=admin
@@ -53,8 +64,11 @@ services:
     command: watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A core worker --loglevel=info
     volumes:
       - ./core:/app
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     environment:
       - SECRET_KEY=test
+      - TZ=Asia/Tehran
       - CELERY_BROKER_URL=redis://redis-bb:6379/0
       - DB_NAME=postgres-bb
       - DB_USER=admin
@@ -71,8 +85,11 @@ services:
     command: watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     volumes:
       - ./core:/app
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     environment:
       - SECRET_KEY=test
+      - TZ=Asia/Tehran
       - CELERY_BROKER_URL=redis://redis-bb:6379/0
       - DB_NAME=postgres-bb
       - DB_USER=admin
@@ -82,19 +99,22 @@ services:
     depends_on:
       - redis-bb
       - postgres-bb
+
   nginx:
     image: docker.arvancloud.ir/nginx
     container_name: nginx
-    restart: always 
+    restart: always
     ports:
-     - "80:80"
+      - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - static_volume:/app/staticfiles
       - media_volume:/app/media
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     depends_on:
-     - redis-bb
-     - backend-bb
+      - redis-bb
+      - backend-bb
 
 volumes:
     postgres_data:
