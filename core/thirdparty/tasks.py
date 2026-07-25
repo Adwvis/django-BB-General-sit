@@ -51,6 +51,10 @@ def check_active_assignments():
         lock.release()
 
 # region week day ------------------------
+def now_local_time():
+    from django.utils import timezone
+    return timezone.localtime(timezone.now()).time()
+
 def week_day():
     today_weekday = datetime.now().weekday()
     iran_weekday = (today_weekday + 2) % 7
@@ -287,8 +291,15 @@ def filtered_paid_order_def():
     from accounts.models import ProfileThpIssuingAgent
     from thirdparty.models import ThpIssuingOrder
     with transaction.atomic():
-        unique_companies = ProfileThpIssuingAgent.objects.filter(start_shift__lte=timezone.now(),end_shift__gte=timezone.now(),
-        is_working = True , is_visible= True, working_days__contains=[week_day()]).values_list("working_insurance_company__name",flat=True,).distinct()
+        unique_companies = ProfileThpIssuingAgent.objects.filter(
+            person_name__isnull = False,
+            start_shift__lte=now_local_time(),
+            end_shift__gte=now_local_time(),
+            is_working = True ,
+            is_visible= True,
+            working_days__contains=[week_day()]
+            ).exclude(person_name="").values_list("working_insurance_company__name",flat=True,).distinct()
+        
         paid_filtered_order = ThpIssuingOrder.objects.filter(
         state_name="paid",company_name__in=unique_companies,first_paid_date__isnull=True,).values("tracking_code","uid",)
         return list(paid_filtered_order)
@@ -368,8 +379,15 @@ def filtered_issuing_order():
     from accounts.models import ProfileThpIssuingAgent
     from thirdparty.models import ThpIssuingOrder
 
-    present_agents = ProfileThpIssuingAgent.objects.filter(start_shift__lte=timezone.now(),end_shift__gte=timezone.now(),
-                                                           working_days__contains=[week_day()],is_working = True , is_visible= True)
+    present_agents = ProfileThpIssuingAgent.objects.filter(
+        person_name__isnull = False,
+        start_shift__lte=now_local_time(),
+        end_shift__gte=now_local_time(),
+        working_days__contains=[week_day()],
+        is_working = True ,
+        is_visible= True
+        ).exclude(person_name="")
+    
     filtered_orders = ThpIssuingOrder.objects.filter(Q(is_issuing=True) | Q(is_issuing__isnull=True),state_name = "issuing",chosen_issuing_agent_name__in=present_agents).values("tracking_code", "uid")
     print(present_agents)
     print("-"*100)
@@ -455,9 +473,15 @@ def specify_issuing_agent_name():
 def search_agent_in_auth_user():
     from accounts.models import ProfileThpIssuingAgent , WorkingInsuranceCompanies , AuthUserBackOffice
     
-    agents_list = ProfileThpIssuingAgent.objects.filter(start_shift__lte=timezone.now(),end_shift__gte=timezone.now(),
-    working_days__contains=[week_day()],is_working = True , is_visible= True).values("person_name","working_insurance_company__name",
-                                                                                     "working_insurance_company__last_name",)
+    agents_list = ProfileThpIssuingAgent.objects.filter(
+        person_name__isnull = False,
+        start_shift__lte=now_local_time(),
+        end_shift__gte=now_local_time(),
+        working_days__contains=[week_day()],
+        is_working = True ,
+        is_visible= True
+        ).values("person_name","working_insurance_company__name",
+         "working_insurance_company__last_name",)
 
     for agent in agents_list:
         res = AuthUserBackOffice.objects.filter(first_name=agent["person_name"],last_name=agent["working_insurance_company__last_name"]).all()
@@ -490,8 +514,14 @@ def agents_issuing_counts():
     from collections import defaultdict
 
 
-    present_agents = ProfileThpIssuingAgent.objects.filter(start_shift__lte=timezone.now(),end_shift__gte=timezone.now(),
-                                                           working_days__contains=[week_day()],is_working = True , is_visible= True)
+    present_agents = ProfileThpIssuingAgent.objects.filter(
+        person_name__isnull = False,
+        start_shift__lte=now_local_time(),
+        end_shift__gte=now_local_time(),
+        working_days__contains=[week_day()],
+        is_working = True ,
+        is_visible= True
+        ).exclude(person_name="")
 
     result = (
         ThpIssuingOrder.objects
@@ -509,8 +539,16 @@ def agents_issuing_counts():
     for item in result:
         updated_agent_ids.append(item["chosen_issuing_agent_name"])
 
-        agent_instance = ProfileThpIssuingAgent.objects.filter(is_working=True,is_visible=True,start_shift__lte=timezone.now(),end_shift__gte=timezone.now(),
-                                                               working_days__contains=[week_day()],id=item["chosen_issuing_agent_name"]).first()
+        agent_instance = ProfileThpIssuingAgent.objects.filter(
+            person_name__isnull = False,
+            start_shift__lte=now_local_time(),
+            end_shift__gte=now_local_time(),
+            is_working=True,
+            is_visible=True,
+            working_days__contains=[week_day()],
+            id=item["chosen_issuing_agent_name"]
+            ).first()
+        
         companies = (item["companies"] or "").split(", ")
         tracking_codes = (item["tracking_code"] or "").split(", ")
 
@@ -765,12 +803,17 @@ def preassing():
 
             right_agents = (
                 ProfileThpIssuingAgent.objects
-                .filter(working_insurance_company__name=item.company_name)
-                .filter(working_category__name__in=work_group_needed)
-                .filter(capacity__gt=F("assigned_order"))
-                .filter(is_working = True , is_visible= True)
-                .filter(working_days__contains=[week_day()])
-                .exclude(id__in=excluded_agent_id)
+                .filter(
+                person_name__isnull = False,
+                start_shift__lte=now_local_time(),
+                end_shift__gte=now_local_time(),
+                working_insurance_company__name=item.company_name,
+                working_category__name__in=work_group_needed,
+                capacity__gt=F("assigned_order"),
+                is_working = True , is_visible= True,
+                working_days__contains=[week_day()],
+                )
+                .exclude(id__in=excluded_agent_id,person_name="")
                 .order_by("assigned_order")
             )
 
@@ -778,11 +821,16 @@ def preassing():
 
             right_agents = (
                 ProfileThpIssuingAgent.objects
-                .filter(working_insurance_company__name=item.company_name)
-                .filter(working_category__name__in=work_group_needed)
-                .filter(capacity__gt=F("assigned_order"))
-                .filter(is_working = True , is_visible= True)
-                .filter(working_days__contains=[week_day()])
+                .filter(
+                person_name__isnull = False,
+                start_shift__lte=now_local_time(),
+                end_shift__gte=now_local_time(),
+                working_insurance_company__name=item.company_name,
+                working_category__name__in=work_group_needed,
+                capacity__gt=F("assigned_order"),
+                is_working = True , is_visible= True,
+                working_days__contains=[week_day()])
+                .exclude(person_name="")
                 .order_by("assigned_order")
             )
 

@@ -11,4 +11,5 @@ urlpatterns = [
     # path("ThpIssuingAgentsDetail/<int:pk>/",ThpIssuingAgentsDetail.as_view(),name="ThpIssuingAgentsDetail"),
     path("EditIssuingAgent/<int:pk>/",cache_page(10)(EditIssuingAgent.as_view()),name="EditIssuingAgent"),
     path("ThpIssuingDashBoards/",cache_page(10)(ThpIssuingDashBoards.as_view()),name="ThpIssuingDashBoards"),
+    path("test_time/",test_time,name="test_time"),
 ]

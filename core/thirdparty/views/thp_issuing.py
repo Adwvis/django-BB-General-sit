@@ -34,3 +34,9 @@ class EditIssuingAgent(TeamAccessMixin,UpdateView):
     success_url = '/thirdparty/ThpIssuingAgentsList/'
 # test_ThpSupervizer
 
+from django.http import HttpResponse
+from django.utils import timezone
+# Create your views here.
+
+def test_time(request):
+    return HttpResponse(str(timezone.localtime(timezone.now())))
