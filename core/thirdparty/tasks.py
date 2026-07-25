@@ -1028,8 +1028,25 @@ async def assingment():
 
 # endregion
 
+@sync_to_async
+def get_present_agents():
+    from accounts.models import ProfileThpIssuingAgent
+    return list(
+        ProfileThpIssuingAgent.objects.filter(
+            person_name__isnull=False,
+            start_shift__lte=now_local_time(),
+            end_shift__gte=now_local_time(),
+            working_days__contains=[week_day()],
+            is_working=True,
+            is_visible=True
+        ).exclude(person_name="")
+    )
 
 async def main_thp_issuing_assignment():
+
+    present_agents = await get_present_agents()
+    if not present_agents:
+        return
     
     await asyncio.gather(
         calling_issuing_list(limit=300),
