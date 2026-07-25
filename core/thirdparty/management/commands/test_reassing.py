@@ -149,6 +149,7 @@ def get_reassign_orders():
             state_name="issuing",
             is_issuing=True
         )
+        orders_list = list(orders)
         data = list(orders.values())
         for d in data:
             d['assigned_from_id'] = d.get('chosen_issuing_agent_name_id')
@@ -173,7 +174,7 @@ def get_reassign_orders():
             chosen_issuing_agent_name=None,
             assignment_status="reassigned"
         )
-    return list(orders)
+    return orders_list
 
 async def find_reassine():
     orders = await get_reassign_orders()
