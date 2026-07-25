@@ -1044,7 +1044,7 @@ async def main_thp_issuing_assignment():
         calling_paid_order_detail(),
     )
     await agents_issuing_counts()
-    await find_reassine()
+    # await find_reassine()
     await score()
     await preassing()
     await assingment()
