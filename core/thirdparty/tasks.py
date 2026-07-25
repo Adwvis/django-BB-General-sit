@@ -572,7 +572,6 @@ def agents_issuing_counts():
 async def chang_state_in_back_office_to_paid(item,client,semaphore,bb_login_csrftoken):
     async with semaphore:
         try:
-            print("start chang_state_in_back_office_to_paid")
             change_state_url= f"https://bimebazar.com/panel/orders/change-state/{item.uid}/"
             change_state_data = {
             "csrfmiddlewaretoken": bb_login_csrftoken,
@@ -585,9 +584,8 @@ async def chang_state_in_back_office_to_paid(item,client,semaphore,bb_login_csrf
             }
             
             response_change_state = await client.post(change_state_url, data=change_state_data, headers=change_state_headers)
-            print(f"response_change_state , {response_change_state.status_code},{response_change_state.text}")
             if response_change_state.status_code != 200:
-                print(f"Unexpected status {response_change_state.status_code} for {item.tracking_code}")
+                print(f"Unexpected status {response_change_state.status_code}, {response_change_state.text} for {item.tracking_code}")
         except Exception as e:
             print(f"chang state in back office to paid Error tracking_code={item.tracking_code},{e}")
 
@@ -641,6 +639,7 @@ def get_reassign_orders():
             state_name="issuing",
             is_issuing=True
         )
+        orders_list = list(orders)
         data = list(orders.values())
         for d in data:
             d['assigned_from_id'] = d.get('chosen_issuing_agent_name_id')
@@ -664,7 +663,7 @@ def get_reassign_orders():
             chosen_issuing_agent_name=None,
             assignment_status="reassigned"
         )
-        return list(orders)
+    return orders_list
 
 async def find_reassine():
     orders = await get_reassign_orders()
@@ -1044,7 +1043,7 @@ async def main_thp_issuing_assignment():
         calling_paid_order_detail(),
     )
     await agents_issuing_counts()
-    # await find_reassine()
+    await find_reassine()
     await score()
     await preassing()
     await assingment()
