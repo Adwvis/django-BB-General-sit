@@ -10,7 +10,7 @@ from .pagination import ThpIssuingInPaidOrderPagination , ThpIssuingOrderPaginat
 
 class ThpIssuingInPaidOrderViewSet(viewsets.ModelViewSet):
     http_method_names = ['get']
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class = ThpIssuingInPaidOrderSerialazer
     pagination_class = ThpIssuingInPaidOrderPagination
     def get_queryset(self):
@@ -18,7 +18,7 @@ class ThpIssuingInPaidOrderViewSet(viewsets.ModelViewSet):
     
 class ThpIssuingOrderViewSet(viewsets.ModelViewSet):
     http_method_names = ['get']
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class = ThpIssuingOrderSerialazer
     pagination_class = ThpIssuingOrderPagination
     def get_queryset(self):
@@ -27,7 +27,7 @@ class ThpIssuingOrderViewSet(viewsets.ModelViewSet):
 
 class ThpIssuingInPaidOrderBashbordViewSet(viewsets.ModelViewSet):
     http_method_names = ['get']
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class = ThpIssuingInPaidOrderBashbordSerialazer
     # pagination_class = ThpIssuingInPaidOrderPagination
     def get_queryset(self):
@@ -45,7 +45,7 @@ class ThpIssuingInPaidOrderBashbordViewSet(viewsets.ModelViewSet):
     
 class ThpIssuingBashbordTextViewSet(viewsets.ViewSet):
     http_method_names = ["get"]
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     def list(self, request):
         from django.db import connection

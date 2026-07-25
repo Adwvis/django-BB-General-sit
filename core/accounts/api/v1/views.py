@@ -11,7 +11,7 @@ from django.utils import timezone
 
 class ThpIssuingAgentViewSet(viewsets.ModelViewSet):
     http_method_names = ["put",'get', 'patch',]
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class = IssuingAgentSerialazer
 
     def get_queryset(self):
@@ -20,7 +20,7 @@ class ThpIssuingAgentViewSet(viewsets.ModelViewSet):
 
 class ThpIssuingAvailableAgentBashbordViewSet(viewsets.ModelViewSet):
     http_method_names = ['get',]
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class = IssuingAgentSerialazer
 
     def get_queryset(self):
@@ -28,7 +28,7 @@ class ThpIssuingAvailableAgentBashbordViewSet(viewsets.ModelViewSet):
     
 class ThpIssuingPresentAgentBashbordViewSet(viewsets.ModelViewSet):
     http_method_names = ['get',]
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class = ThpIssuingPresentAgentSerialazer
 
     def get_queryset(self):
@@ -44,21 +44,21 @@ class ThpIssuingPresentAgentBashbordViewSet(viewsets.ModelViewSet):
 
 class ThpWorkingCategoryViewSet(viewsets.ModelViewSet):
     http_method_names = ['get']
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class = ThpWorkingCategorySerialazer
     def get_queryset(self):
         return ThpWorkingCategory.objects.all()
     
 class WorkingInsuranceCompaniesViewSet(viewsets.ModelViewSet):
     http_method_names = ['get']
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class = WorkingInsuranceCompaniesSerialazer
     def get_queryset(self):
         return WorkingInsuranceCompanies.objects.all()
     
 # class WorkingDayViewSet(viewsets.ModelViewSet):
 #     http_method_names = ['get']
-#     permission_classes = [IsAdminUser]
+#     permission_classes = [IsAuthenticated]
 #     serializer_class = WorkingDaySerialazer
 #     def get_queryset(self):
 #         return WorkingDay.objects.all()
