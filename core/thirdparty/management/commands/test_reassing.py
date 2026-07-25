@@ -176,6 +176,7 @@ def get_reassign_orders():
 
 async def find_reassine():
     orders = await get_reassign_orders()
+    print([item.tracking_code for item in orders])
     await find_chang_state_in_back_office_to_paid(orders)
 
 
