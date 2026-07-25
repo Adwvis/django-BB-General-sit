@@ -1046,6 +1046,7 @@ async def main_thp_issuing_assignment():
 
     present_agents = await get_present_agents()
     if not present_agents:
+        print("No present agents Stoping code-----------------------------------------")
         return
     
     await asyncio.gather(
