@@ -799,7 +799,7 @@ def preassing():
         work_group_needed = ["fresh" if item.is_fresh else "secondary"]
 
         if item.assignment_status == "reassigned":
-            excluded_agent_id = ThpIssuingOrderLog.objects.filter(tracking_code="9708222",assignment_status="reassigned").values("assigned_from_id")
+            excluded_agent_id = ThpIssuingOrderLog.objects.filter(tracking_code=item.tracking_code,assignment_status="reassigned").values("assigned_from_id")
 
             right_agents = (
                 ProfileThpIssuingAgent.objects
