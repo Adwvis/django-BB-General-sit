@@ -80,3 +80,4 @@ httpx
 # git commit -m "توضیح کوتاه تغییرات"
 # git push
 
+# pg_dump -U admin -h localhost -Fc postgres-bb > mydb.dump

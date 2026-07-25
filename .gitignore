@@ -40,7 +40,4 @@ static_root/
 # اگه می‌خوای migrations رو ignore کنی خط زیر رو از کامنت در بیار:
 */migrations/*.py
 !*/migrations/__init__.py
-
-
-data.json
-db_backup.json
+.mydb.dump
