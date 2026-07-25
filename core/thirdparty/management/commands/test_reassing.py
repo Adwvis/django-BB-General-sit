@@ -182,6 +182,6 @@ async def find_reassine():
 
 class Command(BaseCommand):
     help = "Update paid orders"
-
-    asyncio.run(find_reassine())
+    def handle(self, *args, **options):
+        asyncio.run(find_reassine())
 
