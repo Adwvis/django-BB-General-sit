@@ -158,6 +158,7 @@ def get_reassign_orders():
             [ThpIssuingOrderLog(**d) for d in data], batch_size=500
         )
         for item in orders:
+            print(item.tracking_code)
             agent = item.chosen_issuing_agent_name
             # print(item.tracking_code, agent.person_name, agent.capacity)
             if agent.capacity == 0:
@@ -172,7 +173,7 @@ def get_reassign_orders():
             chosen_issuing_agent_name=None,
             assignment_status="reassigned"
         )
-        return list(orders)
+    return list(orders)
 
 async def find_reassine():
     orders = await get_reassign_orders()
