@@ -577,13 +577,14 @@ async def chang_state_in_back_office_to_paid(item,client,semaphore,bb_login_csrf
             "csrfmiddlewaretoken": bb_login_csrftoken,
             "transition": "131",
             'activate_messaging': 'on',           
-            'activate_recalculate': 'on',          
+            'activate_recalculate': 'on',
             'deactivation_timeout': '60',  }
             change_state_headers = {
             "Referer": change_state_url,
             }
             
             response_change_state = await client.post(change_state_url, data=change_state_data, headers=change_state_headers)
+            print(f"response_change_state , {response_change_state.status_code},{response_change_state.text}")
             if response_change_state.status_code != 200:
                 print(f"Unexpected status {response_change_state.status_code} for {item.tracking_code}")
         except Exception as e:
