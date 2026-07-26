@@ -24,7 +24,9 @@ class ThpIssuingAvailableAgentBashbordViewSet(viewsets.ModelViewSet):
     serializer_class = IssuingAgentSerialazer
 
     def get_queryset(self):
-        return ProfileThpIssuingAgent.objects.filter(start_shift__lte=timezone.now(),end_shift__gte=timezone.now(),is_working = True , is_visible= True)
+        return ProfileThpIssuingAgent.objects.filter(start_shift__lte=timezone.localtime(timezone.now()).time(),
+                                                     end_shift__gte=timezone.localtime(timezone.now()).time(),
+                                                     is_working = True , is_visible= True)
     
 class ThpIssuingPresentAgentBashbordViewSet(viewsets.ModelViewSet):
     http_method_names = ['get',]
@@ -37,7 +39,8 @@ class ThpIssuingPresentAgentBashbordViewSet(viewsets.ModelViewSet):
         today_weekday = datetime.now().weekday()
         iran_weekday = (today_weekday + 2) % 7
         print(iran_weekday)
-        return ProfileThpIssuingAgent.objects.filter(start_shift__lte=timezone.now(),end_shift__gte=timezone.now(),
+        return ProfileThpIssuingAgent.objects.filter(start_shift__lte=timezone.localtime(timezone.now()).time(),
+                                                     end_shift__gte=timezone.localtime(timezone.now()).time(),
                                                       working_days__contains=[iran_weekday],
                                                      is_working = True , is_visible= True)
     
