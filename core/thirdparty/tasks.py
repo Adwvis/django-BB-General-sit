@@ -584,6 +584,7 @@ async def chang_state_in_back_office_to_paid(item,client,semaphore,bb_login_csrf
             }
             
             response_change_state = await client.post(change_state_url, data=change_state_data, headers=change_state_headers)
+            print(f"chang_state_in_back_office_to_paid {response_change_state.status_code} , {response_change_state.text}")
             if response_change_state.status_code != 200:
                 print(f"Unexpected status {response_change_state.status_code}, {response_change_state.text} for {item.tracking_code}")
         except Exception as e:
@@ -667,6 +668,7 @@ def get_reassign_orders():
 
 async def find_reassine():
     orders = await get_reassign_orders()
+    print(f"find_reassine {orders}")
     await find_chang_state_in_back_office_to_paid(orders)
 
 
