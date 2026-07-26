@@ -56,6 +56,7 @@ class ThpIssuingBashbordTextViewSet(viewsets.ViewSet):
                 COUNT(tracking_code) AS total_assign_count
             FROM public.thirdparty_thpissuingorderlog
             where chosen_issuing_agent_name_id is not null
+            AND created_at::date = CURRENT_DATE
             GROUP BY chosen_issuing_agent_name_id
             ),
             reassign_count AS (
@@ -64,6 +65,7 @@ class ThpIssuingBashbordTextViewSet(viewsets.ViewSet):
                 COUNT(tracking_code) AS reassign_count
             FROM public.thirdparty_thpissuingorderlog
             WHERE assigned_from_id IS NOT NULL
+            AND created_at::date = CURRENT_DATE
             GROUP BY assigned_from_id
             )
 
@@ -80,6 +82,7 @@ class ThpIssuingBashbordTextViewSet(viewsets.ViewSet):
                 ON p.id = t.chosen_issuing_agent_name_id
             WHERE p.is_working = true
             AND p.is_visible = true;
+
         """
 
         with connection.cursor() as cursor:
