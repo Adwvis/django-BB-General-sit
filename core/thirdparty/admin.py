@@ -19,7 +19,7 @@ class ThpIssuingInIssuingOrderAdmin(admin.ModelAdmin):
 
 class CustomIssuingOrderLogAdmin(admin.ModelAdmin):
     model = ThpIssuingOrderLog
-    list_display = ("tracking_code","assigned_from","chosen_issuing_agent_name","assignment_status","created_at")
+    list_display = ("tracking_code","assigned_from","chosen_issuing_agent_name","assignment_status","created_at","last_action")
     list_filter = ("is_issuing","state_name","is_issuing","assignment_status")
     search_fields = ("tracking_code","order_id","uid","chosen_issuing_agent_name__person_name",
                      "assigned_from__person_name","assignment_status","assignment_status")
