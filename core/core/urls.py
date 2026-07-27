@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/token/', obtain_auth_token, name='api_token_auth'),
     path('api-auth/', include('rest_framework.urls')),
     path("thirdparty/", include("thirdparty.urls")),
+    path("bnpl/", include("bnpl.urls")),
 ]
 if settings.DEBUG:
     urlpatterns += static(

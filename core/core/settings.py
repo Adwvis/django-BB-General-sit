@@ -42,10 +42,11 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
+    "django_celery_beat",
     "accounts",
     "orders",
     "thirdparty",
-    "django_celery_beat",
+    "bnpl",
     
 ]
 

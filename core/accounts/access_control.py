@@ -9,7 +9,8 @@ class TeamAccessControl:
     """نگاشت مرکزی: هر تیم به کدوم صفحات دسترسی داره"""
 
     PERMISSIONS = {
-        "ThpSupervizer": ["ThpIssuingAgentsList", "ThpIssuingDashBoards", "EditIssuingAgent"],
+        "ThpSupervizer": ["ThpIssuingAgentsList", "ThpIssuingDashBoards", "EditIssuingAgent",],
+        "BnplSupervizer": ["BnplAccountListView","EditBnplAccount"]
         # "ThpIssunigAgent": [""],
     }
 

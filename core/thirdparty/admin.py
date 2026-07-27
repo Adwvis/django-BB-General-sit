@@ -13,7 +13,7 @@ class ThpIssuingInPaidOrderAdmin(admin.ModelAdmin):
 
 class ThpIssuingInIssuingOrderAdmin(admin.ModelAdmin):
     model = ThpIssuingInIssuingOrder
-    list_display = ("tracking_code","company_name","issuing_agent_id","issuing_agent_name","is_issuing","last_action")
+    list_display = ("tracking_code","company_name","issuing_agent_id","issuing_agent_name","is_issuing",)
     list_filter = ("is_issuing",)
     search_fields = ("tracking_code","order_id","uid","issuing_agent_name")
 

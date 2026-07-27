@@ -8,7 +8,9 @@ from .access_control import TeamAccessControl
 
 VIEW_REGISTRY = {
     "ThpIssuingAgentsList": {"url_name": "thirdparty:ThpIssuingAgentsList", "label": "لیست نیروهای صدور"},
-    "ThpIssuingDashBoards": {"url_name": "thirdparty:ThpIssuingDashBoards", "label": "داشبورد صدور"},   
+    "ThpIssuingDashBoards": {"url_name": "thirdparty:ThpIssuingDashBoards", "label": "داشبورد صدور"},
+    "BnplAccountListView": {"url_name": "bnpl:BnplAccountListView", "label": "نیروهای bnpl  "},
+    
 }
 
 
