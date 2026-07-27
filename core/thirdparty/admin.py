@@ -30,7 +30,7 @@ class ThpissuingOrderAdmin(admin.ModelAdmin):
     model = ThpIssuingOrder
     list_display = ("tracking_code","company_name","state_name","issuing_agent_id","first_paid_date",
                     "is_issuing","chosen_issuing_agent_auth_user_id","chosen_issuing_agent_name","score",
-                    "assignment_status")
+                    "assignment_status","last_action")
     list_filter = ("is_issuing","state_name","is_issuing","assignment_status")
     search_fields = ("tracking_code","order_id","uid","chosen_issuing_agent_name__person_name",)
 
