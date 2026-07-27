@@ -950,7 +950,9 @@ async def assing(item,client,semaphore,bb_login_csrftoken):
             "transition": "57",
             'activate_messaging': 'on',           
             'activate_recalculate': 'on',          
-            'deactivation_timeout': '60',  }
+            'deactivation_timeout': '60',
+            'general_reason': '', }
+            
             change_state_headers = {
             "Referer": change_state_url,
             }
@@ -1063,7 +1065,7 @@ async def main_thp_issuing_assignment():
         calling_paid_order_detail(),
     )
     await agents_issuing_counts()
-    # await find_reassine()
+    await find_reassine()
     await score()
     await preassing()
     await assingment()

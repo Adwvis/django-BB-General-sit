@@ -59,3 +59,4 @@ admin.site.register(WorkingInsuranceCompanies,WorkingInsuranceCompaniesAdmin)
 admin.site.register(ThpWorkingCategory)
 admin.site.register(AuthUserBackOffice,AuthUserBackOfficeAdmin)
 admin.site.register(ForeignLoginToken,ForeignLoginTokenAdmin)
+

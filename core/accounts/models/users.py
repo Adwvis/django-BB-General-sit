@@ -72,6 +72,6 @@ def save_profile(sender, instance, created, **kwargs):
         return
     
     if instance.team:
-        from .profile_thp import ProfileThpIssuingAgent
         if instance.team.name == "ThpIssunigAgent":
+            from .profile_thp import ProfileThpIssuingAgent
             ProfileThpIssuingAgent.objects.create(profile_user=instance,)
