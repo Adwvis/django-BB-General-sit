@@ -851,6 +851,7 @@ def preassing():
             agent.assigned_order = F("assigned_order") + 1  
             item.save()
             agent.save()
+            # agent.refresh_from_db()
         
 # endregion
 
@@ -1077,7 +1078,7 @@ def thp_issuing_assignment():
 
     lock = redis_client.lock(
         "thp_issuing_assignment",
-        timeout=300,
+        timeout=450,
         blocking=False,
     )
 
