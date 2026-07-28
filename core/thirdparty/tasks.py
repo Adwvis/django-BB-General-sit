@@ -1078,7 +1078,7 @@ def thp_issuing_assignment():
 
     lock = redis_client.lock(
         "thp_issuing_assignment",
-        timeout=450,
+        timeout=600,
         blocking=False,
     )
 
