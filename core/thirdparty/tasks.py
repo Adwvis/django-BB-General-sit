@@ -1085,9 +1085,6 @@ def thp_issuing_assignment():
     acquired = lock.acquire()
 
     if not acquired:
-        # print(
-        #     "thp_issuing_assignment task is ongoing -------------------------------------------------------"
-        # )
         return
 
     try:
@@ -1099,24 +1096,20 @@ def thp_issuing_assignment():
     
 #     from datetime import datetime
 #     print(f"time is {datetime.now()} -----------------")
-
-# # @shared_task(bind=True)
-# def thp_issuing_assignment_bind(self):
-
-#     lock = redis_client.lock(
-#         "thp_issuing_assignment_bind",
-#         timeout=10,
-#         blocking=False,
-#     )
-
-#     if not lock.acquire():
-#         self.apply_async(countdown=5)
-#         return
-#     check_condition_from_db = False
-#     try:
-#         if check_condition_from_db:
-#             asyncio.run(test_print())
-#     finally:
-#         lock.release()
-
-#     self.apply_async(countdown=5)
+@shared_task(bind=True)
+def thp_issuing_assignment_bind(self):
+    lock = redis_client.lock(
+        "thp_issuing_assignment_bind",
+        timeout=450,
+        blocking=False,
+    )
+    try:
+        if lock.acquire():
+            try:
+                check_condition_from_db = True
+                if check_condition_from_db:
+                    asyncio.run(main_thp_issuing_assignment())
+            finally:
+                lock.release()
+    finally:
+        self.apply_async(countdown=5)
