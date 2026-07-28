@@ -13,11 +13,7 @@ from datetime import datetime
 import time
 
 
-redis_client = redis.Redis(
-    host="redis-bb",
-    port=6379,
-    db=0
-)
+
 
 @shared_task
 def t_test():
@@ -1073,43 +1069,95 @@ async def main_thp_issuing_assignment():
 
 
 
+# @shared_task
+# def thp_issuing_assignment():
+
+#     lock = redis_client.lock(
+#         "thp_issuing_assignment",
+#         timeout=600,
+#         blocking=False,
+#     )
+
+#     acquired = lock.acquire()
+
+#     if not acquired:
+#         return
+
+#     try:
+#         asyncio.run(main_thp_issuing_assignment())
+#     finally:
+#         lock.release()
+
+import threading
+import logging
+
+from celery import shared_task
+
+logger = logging.getLogger(__name__)
+
+redis_client = redis.Redis(host="redis-bb", port=6379, db=0)
+
+
+LOCK_NAME = "thp_issuing_assignment"
+LOCK_TIMEOUT = 600          # اگه هیچ چیزی تمدیدش نکنه، حداکثر این‌قدر زنده می‌مونه
+EXTEND_INTERVAL = 200        # هر ۲۰۰ ثانیه یک‌بار تمدید کن (کمتر از تایم‌اوت)
+
+
 @shared_task
 def thp_issuing_assignment():
-
     lock = redis_client.lock(
-        "thp_issuing_assignment",
-        timeout=600,
+        LOCK_NAME,
+        timeout=LOCK_TIMEOUT,
         blocking=False,
     )
 
-    acquired = lock.acquire()
-
-    if not acquired:
+    if not lock.acquire():
+        # یک اجرای دیگه در حال انجامه، این نوبت رو رد کن
         return
+
+    stop_event = threading.Event()
+
+    def extend_lock():
+        while not stop_event.wait(EXTEND_INTERVAL):
+            try:
+                lock.extend(additional_time=LOCK_TIMEOUT, replace_ttl=True)
+            except Exception:
+                logger.warning("thp_issuing_assignment: failed to extend lock, stopping extender")
+                break
+
+    watchdog = threading.Thread(target=extend_lock, daemon=True)
+    watchdog.start()
 
     try:
         asyncio.run(main_thp_issuing_assignment())
+    except Exception:
+        logger.exception("thp_issuing_assignment: unhandled error in main_thp_issuing_assignment")
     finally:
-        lock.release()
+        stop_event.set()
+        watchdog.join()
+        try:
+            lock.release()
+        except Exception:
+            pass
 
-# async def test_print():
-    
-#     from datetime import datetime
-#     print(f"time is {datetime.now()} -----------------")
-@shared_task(bind=True)
-def thp_issuing_assignment_bind(self):
-    lock = redis_client.lock(
-        "thp_issuing_assignment_bind",
-        timeout=450,
-        blocking=False,
-    )
-    try:
-        if lock.acquire():
-            try:
-                check_condition_from_db = True
-                if check_condition_from_db:
-                    asyncio.run(main_thp_issuing_assignment())
-            finally:
-                lock.release()
-    finally:
-        self.apply_async(countdown=5)
+
+
+# @shared_task(bind=True)
+# def thp_issuing_assignment_bind(self):
+#     lock = redis_client.lock(
+#         "thp_issuing_assignment_bind",
+#         timeout=450,
+#         blocking=False,
+#     )
+#     try:
+#         if lock.acquire():
+#             try:
+#                 check_condition_from_db = True
+#                 if check_condition_from_db:
+#                     asyncio.run(main_thp_issuing_assignment())
+#             finally:
+#                 lock.release()
+#     finally:
+#         self.apply_async(countdown=5)
+
+
