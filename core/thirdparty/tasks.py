@@ -847,7 +847,7 @@ def preassing():
             agent.assigned_order = F("assigned_order") + 1  
             item.save()
             agent.save()
-            # agent.refresh_from_db()
+            agent.refresh_from_db()
         
 # endregion
 
