@@ -8,7 +8,7 @@ from .serializers import BnplAccountListSerialazer
 
 class BnplAccountListViewSet(viewsets.ModelViewSet):
     http_method_names = ['get']
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = BnplAccountListSerialazer
     def get_queryset(self):
         return BnplAccount.objects.all()
