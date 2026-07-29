@@ -519,9 +519,22 @@ def agents_issuing_counts():
         is_visible= True
         ).exclude(person_name="")
 
+    # result = (
+    #     ThpIssuingOrder.objects
+    #     .filter(is_issuing=True,state_name = "issuing",chosen_issuing_agent_name__in = present_agents)
+    #     .values("chosen_issuing_agent_name")
+    #     .annotate(
+    #         count_=Count("tracking_code"),
+    #         companies=StringAgg("company_name", delimiter=", ", ordering="company_name"),
+    #         tracking_code=StringAgg(Cast("tracking_code", CharField()), delimiter=", ", ordering="company_name"),
+    #     )
+    # )
+
     result = (
         ThpIssuingOrder.objects
-        .filter(is_issuing=True,state_name = "issuing",chosen_issuing_agent_name__in = present_agents)
+        .filter(state_name = "issuing",chosen_issuing_agent_name__in = present_agents)
+        .exclude(is_issuing=False)
+        .distinct("tracking_codes")
         .values("chosen_issuing_agent_name")
         .annotate(
             count_=Count("tracking_code"),
