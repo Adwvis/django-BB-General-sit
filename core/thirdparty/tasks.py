@@ -1128,8 +1128,8 @@ async def main_thp_issuing_assignment():
         return
     
     await asyncio.gather(
-        calling_issuing_list(limit=300),
-        calling_paid_list(limit=300),
+        calling_issuing_list(limit=1000),
+        calling_paid_list(limit=1000),
     )
 
     await search_agent_in_auth_user()
