@@ -124,7 +124,7 @@ def database_process_issuing_list(unique_data, new_tracking_code):
             ])
 
 async def calling_issuing_list(limit):
-    print("start calling issuing list")
+    # print("start calling issuing list")
     while True:
         try:
             all_issuing_list = []
@@ -239,7 +239,7 @@ async def get_paid_detail(semaphore_paid_detail,uid):
         x = 0
         while True:
             try:
-                print("start get_paid_order_detail +")
+                # print("start get_paid_order_detail +")
                 url = f"https://bimebazar.com/api/issue/orders/{uid}/"
 
                 token = "c3dcc40f764ee7d6f1cb72c65d67d360b81d6712"
@@ -251,7 +251,7 @@ async def get_paid_detail(semaphore_paid_detail,uid):
                 async with httpx.AsyncClient(follow_redirects=True,timeout=30) as client:
                     response = await client.get(url, headers=headers)
 
-                print(f"Status: {response.status_code} - {uid}")
+                # print(f"Status: {response.status_code} - {uid}")
 
                 if response.status_code == 200:
                     data = response.json()
@@ -341,7 +341,7 @@ async def get_issuing_detail(semaphore_issuing_detail,uid):
         x = 0
         while True:
             try:
-                print("start get_issuing_order_detail +")
+                # print("start get_issuing_order_detail +")
                 url = f"https://bimebazar.com/api/issue/orders/{uid}/"
 
                 token = "c3dcc40f764ee7d6f1cb72c65d67d360b81d6712"
@@ -353,7 +353,7 @@ async def get_issuing_detail(semaphore_issuing_detail,uid):
                 async with httpx.AsyncClient(follow_redirects=True,timeout=30) as client:
                     response = await client.get(url, headers=headers)
 
-                print(f"Status: {response.status_code} - {uid}")
+                # print(f"Status: {response.status_code} - {uid}")
 
                 if response.status_code == 200:
                     data = response.json()
@@ -385,9 +385,9 @@ def filtered_issuing_order():
         ).exclude(person_name="")
     
     filtered_orders = ThpIssuingOrder.objects.filter(Q(is_issuing=True) | Q(is_issuing__isnull=True),state_name = "issuing",chosen_issuing_agent_name__in=present_agents).values("tracking_code", "uid")
-    print(present_agents)
-    print("-"*100)
-    print(filtered_orders)
+    # print(present_agents)
+    # print("-"*100)
+    # print(filtered_orders)
     return list(filtered_orders)
 
 @sync_to_async
