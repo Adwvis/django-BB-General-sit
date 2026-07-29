@@ -780,75 +780,143 @@ def score():
 
 
 # region preassing
+# @sync_to_async
+# def preassing():
+#     from thirdparty.models import ThpIssuingOrder , ThpIssuingOrderLog
+#     from accounts.models import ProfileThpIssuingAgent , AuthUserBackOffice , WorkingInsuranceCompanies
+#     ThpIssuingOrder.objects.filter(state_name = "paid",chosen_issuing_agent_name__isnull=False).update(chosen_issuing_agent_name=None)
+
+#     paid_order_list =  ThpIssuingOrder.objects.filter(state_name="paid",score__isnull = False, chosen_issuing_agent_name__isnull = True).order_by("-score")
+
+#     if not paid_order_list:
+#         print("paid_order_list is empty")
+#         return
+    
+#     for item in paid_order_list:
+#         # print(item.score)
+        
+#         work_group_needed = ["fresh" if item.is_fresh else "secondary"]
+
+#         if item.assignment_status == "reassigned":
+#             excluded_agent_id = ThpIssuingOrderLog.objects.filter(tracking_code=item.tracking_code,assignment_status="reassigned").values("assigned_from_id")
+
+#             right_agents = (
+#                 ProfileThpIssuingAgent.objects
+#                 .filter(
+#                 person_name__isnull = False,
+#                 start_shift__lte=now_local_time(),
+#                 end_shift__gte=now_local_time(),
+#                 working_insurance_company__name=item.company_name,
+#                 working_category__name__in=work_group_needed,
+#                 capacity__gt=F("assigned_order"),
+#                 is_working = True , is_visible= True,
+#                 working_days__contains=[week_day()],
+#                 )
+#                 .exclude(id__in=excluded_agent_id)
+#                 .exclude(person_name="")
+#                 .order_by("assigned_order")
+#             )
+
+#         else:
+
+#             right_agents = (
+#                 ProfileThpIssuingAgent.objects
+#                 .filter(
+#                 person_name__isnull = False,
+#                 start_shift__lte=now_local_time(),
+#                 end_shift__gte=now_local_time(),
+#                 working_insurance_company__name=item.company_name,
+#                 working_category__name__in=work_group_needed,
+#                 capacity__gt=F("assigned_order"),
+#                 is_working = True , is_visible= True,
+#                 working_days__contains=[week_day()])
+#                 .exclude(person_name="")
+#                 .order_by("assigned_order")
+#             )
+
+#         agent = right_agents.first()
+#         # print(agent)
+#         if agent is None:
+#             continue
+        
+#         company_last_name = WorkingInsuranceCompanies.objects.filter(name=item.company_name).first()
+#         auth_user_company_id = AuthUserBackOffice.objects.filter(first_name=agent.person_name, last_name = company_last_name.last_name).first()
+
+#         with transaction.atomic():
+#             item.chosen_issuing_agent_name = agent
+#             item.chosen_issuing_agent_auth_user_id = auth_user_company_id.id
+#             agent.assigned_order = F("assigned_order") + 1  
+#             item.save()
+#             agent.save()
+#             agent.refresh_from_db()
+
 @sync_to_async
 def preassing():
-    from thirdparty.models import ThpIssuingOrder , ThpIssuingOrderLog
-    from accounts.models import ProfileThpIssuingAgent , AuthUserBackOffice , WorkingInsuranceCompanies
-    ThpIssuingOrder.objects.filter(state_name = "paid",chosen_issuing_agent_name__isnull=False).update(chosen_issuing_agent_name=None)
+    from thirdparty.models import ThpIssuingOrder, ThpIssuingOrderLog
+    from accounts.models import ProfileThpIssuingAgent, AuthUserBackOffice, WorkingInsuranceCompanies
 
-    paid_order_list =  ThpIssuingOrder.objects.filter(state_name="paid",score__isnull = False, chosen_issuing_agent_name__isnull = True).order_by("-score")
+    ThpIssuingOrder.objects.filter(
+        state_name="paid", chosen_issuing_agent_name__isnull=False
+    ).update(chosen_issuing_agent_name=None)
+
+    paid_order_list = ThpIssuingOrder.objects.filter(
+        state_name="paid", score__isnull=False, chosen_issuing_agent_name__isnull=True
+    ).order_by("-score")
 
     if not paid_order_list:
         print("paid_order_list is empty")
         return
-    
+
     for item in paid_order_list:
-        # print(item.score)
-        
+
         work_group_needed = ["fresh" if item.is_fresh else "secondary"]
 
-        if item.assignment_status == "reassigned":
-            excluded_agent_id = ThpIssuingOrderLog.objects.filter(tracking_code=item.tracking_code,assignment_status="reassigned").values("assigned_from_id")
-
-            right_agents = (
-                ProfileThpIssuingAgent.objects
-                .filter(
-                person_name__isnull = False,
-                start_shift__lte=now_local_time(),
-                end_shift__gte=now_local_time(),
-                working_insurance_company__name=item.company_name,
-                working_category__name__in=work_group_needed,
-                capacity__gt=F("assigned_order"),
-                is_working = True , is_visible= True,
-                working_days__contains=[week_day()],
-                )
-                .exclude(id__in=excluded_agent_id,person_name="")
-                .order_by("assigned_order")
-            )
-
-        else:
-
-            right_agents = (
-                ProfileThpIssuingAgent.objects
-                .filter(
-                person_name__isnull = False,
-                start_shift__lte=now_local_time(),
-                end_shift__gte=now_local_time(),
-                working_insurance_company__name=item.company_name,
-                working_category__name__in=work_group_needed,
-                capacity__gt=F("assigned_order"),
-                is_working = True , is_visible= True,
-                working_days__contains=[week_day()])
-                .exclude(person_name="")
-                .order_by("assigned_order")
-            )
-
-        agent = right_agents.first()
-        # print(agent)
-        if agent is None:
-            continue
-        
-        company_last_name = WorkingInsuranceCompanies.objects.filter(name=item.company_name).first()
-        auth_user_company_id = AuthUserBackOffice.objects.filter(first_name=agent.person_name, last_name = company_last_name.last_name).first()
+        base_filters = dict(
+            person_name__isnull=False,
+            start_shift__lte=now_local_time(),
+            end_shift__gte=now_local_time(),
+            working_insurance_company__name=item.company_name,
+            working_category__name__in=work_group_needed,
+            capacity__gt=F("assigned_order"),
+            is_working=True,
+            is_visible=True,
+            working_days__contains=[week_day()],
+        )
 
         with transaction.atomic():
+            agents_qs = (
+                ProfileThpIssuingAgent.objects
+                .select_for_update(skip_locked=True)
+                .filter(**base_filters)
+                .exclude(person_name="")
+            )
+
+            if item.assignment_status == "reassigned":
+                excluded_agent_id = ThpIssuingOrderLog.objects.filter(
+                    tracking_code=item.tracking_code,
+                    assignment_status="reassigned",
+                ).values("assigned_from_id")
+
+                agents_qs = agents_qs.exclude(id__in=excluded_agent_id)
+
+            agent = agents_qs.order_by("assigned_order").first()
+
+            if agent is None:
+                continue
+
+            company_last_name = WorkingInsuranceCompanies.objects.filter(
+                name=item.company_name
+            ).first()
+            auth_user_company_id = AuthUserBackOffice.objects.filter(
+                first_name=agent.person_name, last_name=company_last_name.last_name
+            ).first()
+
             item.chosen_issuing_agent_name = agent
             item.chosen_issuing_agent_auth_user_id = auth_user_company_id.id
-            agent.assigned_order = F("assigned_order") + 1  
+            agent.assigned_order = F("assigned_order") + 1
             item.save()
             agent.save()
             agent.refresh_from_db()
-        
 # endregion
 
 # login and assingment region
