@@ -529,12 +529,10 @@ def agents_issuing_counts():
     #         tracking_code=StringAgg(Cast("tracking_code", CharField()), delimiter=", ", ordering="company_name"),
     #     )
     # )
-
     result = (
         ThpIssuingOrder.objects
-        .filter(state_name = "issuing",chosen_issuing_agent_name__in = present_agents)
-        .exclude(is_issuing=False)
-        .distinct("tracking_codes")
+        .filter(is_issuing=True,state_name="issuing", chosen_issuing_agent_name__in=present_agents)
+        # .exclude()
         .values("chosen_issuing_agent_name")
         .annotate(
             count_=Count("tracking_code"),
@@ -542,6 +540,7 @@ def agents_issuing_counts():
             tracking_code=StringAgg(Cast("tracking_code", CharField()), delimiter=", ", ordering="company_name"),
         )
     )
+
 
     updated_agent_ids = []
 
@@ -558,6 +557,9 @@ def agents_issuing_counts():
             id=item["chosen_issuing_agent_name"]
             ).first()
         
+        if agent_instance is None:
+            continue
+
         companies = (item["companies"] or "").split(", ")
         tracking_codes = (item["tracking_code"] or "").split(", ")
 
