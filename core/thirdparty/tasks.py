@@ -1112,6 +1112,10 @@ def get_present_agents():
     )
 
 async def main_thp_issuing_assignment():
+    import random
+
+    code = random.randint(100000, 999999)
+    print(f"start task- {code} {now_local_time()}" )
 
     present_agents = await get_present_agents()
     if not present_agents:
@@ -1135,6 +1139,7 @@ async def main_thp_issuing_assignment():
     await preassing()
     await assingment()
 
+    print(f"end task- {code} {now_local_time()}" )
 
 
 # @shared_task
