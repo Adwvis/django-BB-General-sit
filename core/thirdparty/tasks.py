@@ -527,7 +527,7 @@ def agents_issuing_counts():
         .annotate(
             count_=Count("tracking_code"),
             companies=StringAgg("company_name", delimiter=", ", ordering="company_name"),
-            tracking_code=StringAgg(Cast("tracking_code", CharField()), delimiter=", ", ordering="company_name"),
+            tracking_codes=StringAgg(Cast("tracking_code", CharField()), delimiter=", ", ordering="company_name"),
         )
     )
 
@@ -551,7 +551,7 @@ def agents_issuing_counts():
             continue
 
         companies = (item["companies"] or "").split(", ")
-        tracking_codes = (item["tracking_code"] or "").split(", ")
+        tracking_codes = (item["tracking_codes"] or "").split(", ")
 
         data = defaultdict(list)
         for company, code in zip(companies, tracking_codes):
@@ -560,7 +560,6 @@ def agents_issuing_counts():
         agent_instance.orders_in_issuing = dict(data)
         agent_instance.assigned_order = (item["count_"])
         agent_instance.save()
-        agent_instance.refresh_from_db()
 
     present_agents.exclude(id__in=updated_agent_ids).update(orders_in_issuing="",assigned_order=0)
 
