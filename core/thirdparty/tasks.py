@@ -519,16 +519,6 @@ def agents_issuing_counts():
         is_visible= True
         ).exclude(person_name="")
 
-    # result = (
-    #     ThpIssuingOrder.objects
-    #     .filter(is_issuing=True,state_name = "issuing",chosen_issuing_agent_name__in = present_agents)
-    #     .values("chosen_issuing_agent_name")
-    #     .annotate(
-    #         count_=Count("tracking_code"),
-    #         companies=StringAgg("company_name", delimiter=", ", ordering="company_name"),
-    #         tracking_code=StringAgg(Cast("tracking_code", CharField()), delimiter=", ", ordering="company_name"),
-    #     )
-    # )
     result = (
         ThpIssuingOrder.objects
         .filter(is_issuing=True,state_name="issuing", chosen_issuing_agent_name__in=present_agents)
@@ -570,6 +560,7 @@ def agents_issuing_counts():
         agent_instance.orders_in_issuing = dict(data)
         agent_instance.assigned_order = (item["count_"])
         agent_instance.save()
+        agent_instance.refresh_from_db()
 
     present_agents.exclude(id__in=updated_agent_ids).update(orders_in_issuing="",assigned_order=0)
 
