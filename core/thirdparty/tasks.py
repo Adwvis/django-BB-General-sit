@@ -384,10 +384,9 @@ def filtered_issuing_order():
         is_visible= True
         ).exclude(person_name="")
     
-    filtered_orders = ThpIssuingOrder.objects.filter(Q(is_issuing=True) | Q(is_issuing__isnull=True),state_name = "issuing",chosen_issuing_agent_name__in=present_agents).values("tracking_code", "uid")
-    # print(present_agents)
-    # print("-"*100)
-    # print(filtered_orders)
+    filtered_orders = ThpIssuingOrder.objects.filter(Q(is_issuing=True) | Q(is_issuing__isnull=True),state_name = "issuing",
+                                                    chosen_issuing_agent_name__in=present_agents).values("tracking_code", "uid")
+
     return list(filtered_orders)
 
 @sync_to_async
@@ -631,16 +630,28 @@ def get_reassign_orders():
     from thirdparty.models import ThpIssuingOrder, ThpIssuingOrderLog
     from datetime import timedelta
     from django.utils import timezone
-
+    from accounts.models import ProfileThpIssuingAgent
     one_hour_ago = timezone.now() - timedelta(hours=1)
 
     with transaction.atomic():
+        
+        present_agents = ProfileThpIssuingAgent.objects.filter(
+        person_name__isnull = False,
+        start_shift__lte=now_local_time(),
+        end_shift__gte=now_local_time(),
+        working_days__contains=[week_day()],
+        is_working = True ,
+        is_visible= True
+        ).exclude(person_name="")
+
         orders = ThpIssuingOrder.objects.filter(
             last_action__isnull=False,
             last_action__lt=one_hour_ago,
             state_name="issuing",
-            is_issuing=True
+            is_issuing=True,
+            chosen_issuing_agent_name__in=present_agents
         )
+
         orders_list = list(orders)
         data = list(orders.values())
         for d in data:
