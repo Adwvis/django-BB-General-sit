@@ -83,7 +83,7 @@ async def get_issuing_list(limit,offset=0):
         "offset": offset,
         "state_canceled": "no_request"
     }
-    token = "c3dcc40f764ee7d6f1cb72c65d67d360b81d6712"
+    token = "7066ce672e32740bac4b7dbb6906486652a87f7d"
     headers = {"Authorization": f"Token {token}"}
     async with httpx.AsyncClient(follow_redirects=True,timeout=60) as client:
         response = await client.get(url, headers=headers , params=params)
@@ -197,7 +197,7 @@ async def get_paid_list(limit,offset=0):
         "offset": offset,
         "state_canceled": "no_request"
     }
-    token = "c3dcc40f764ee7d6f1cb72c65d67d360b81d6712"
+    token = "7066ce672e32740bac4b7dbb6906486652a87f7d"
     headers = {"Authorization": f"Token {token}"}
     async with httpx.AsyncClient(follow_redirects=True,timeout=60) as client:
         response = await client.get(url, headers=headers , params=params)
@@ -242,7 +242,7 @@ async def get_paid_detail(semaphore_paid_detail,uid):
                 # print("start get_paid_order_detail +")
                 url = f"https://bimebazar.com/api/issue/orders/{uid}/"
 
-                token = "c3dcc40f764ee7d6f1cb72c65d67d360b81d6712"
+                token = "7066ce672e32740bac4b7dbb6906486652a87f7d"
 
                 headers = {
                     "Authorization": f"Token {token}"
@@ -344,7 +344,7 @@ async def get_issuing_detail(semaphore_issuing_detail,uid):
                 # print("start get_issuing_order_detail +")
                 url = f"https://bimebazar.com/api/issue/orders/{uid}/"
 
-                token = "c3dcc40f764ee7d6f1cb72c65d67d360b81d6712"
+                token = "7066ce672e32740bac4b7dbb6906486652a87f7d"
 
                 headers = {
                     "Authorization": f"Token {token}"
