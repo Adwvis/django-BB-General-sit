@@ -231,6 +231,84 @@ async def calling_paid_list(limit):
 
 # endregion
 
+# region get order list
+@sync_to_async
+def database_process_orders(unique_data, new_tracking_codes, state_name):
+    from thirdparty.models import ThpIssuingOrder
+    opposite = "issuing" if state_name == "paid" else "paid"
+
+    with transaction.atomic():
+        existing = set(str(tc) for tc in ThpIssuingOrder.objects.filter(state_name=state_name).values_list("tracking_code", flat=True))
+        print(f"{len(existing)} {state_name} Exist")
+
+        to_insert = [item for item in unique_data if str(item["tracking_code"]) not in existing]
+        insert_tcs = [item["tracking_code"] for item in to_insert]
+
+        conflict = set(str(tc) for tc in ThpIssuingOrder.objects.filter(
+            tracking_code__in=insert_tcs, state_name=opposite
+        ).values_list("tracking_code", flat=True))
+
+        to_delete = (existing - new_tracking_codes) | conflict
+
+        if to_delete:
+            print(f"{len(to_delete)} {state_name} Deleted")
+            ThpIssuingOrder.objects.filter(tracking_code__in=to_delete).delete()
+
+        if to_insert:
+            print(f"{len(to_insert)} {state_name} Inserted")
+            ThpIssuingOrder.objects.bulk_create([ThpIssuingOrder(**item) for item in to_insert])
+
+def flatten_order(item):
+    return {
+        "order_id": item["id"],
+        "tracking_code": item["tracking_code"],
+        "uid": item["uid"],
+        "state_id": item["state"]["id"],
+        "state_name": item["state"]["name_en"],
+        "company_id": item["company"]["id"],
+        "company_name": item["company"]["name_en"],
+        "issuing_agent_id": item["agent_id"],
+    }
+
+async def fetch_orders(state: str, limit: int, offset: int = 0):
+    params = {
+        "insurance_type": "thirdparty",
+        "state": state,
+        "limit": limit,
+        "offset": offset,
+        "state_canceled": "no_request",
+    }
+    TOKEN = "7066ce672e32740bac4b7dbb6906486652a87f7d"
+    headers = {"Authorization": f"Token {TOKEN}"}
+    async with httpx.AsyncClient(follow_redirects=True, timeout=60) as client:
+        response = await client.get(f"https://bimebazar.com/api/issue/orders/", headers=headers, params=params)
+    if response.status_code == 200:
+        return response.json()["results"]
+    print(response.text)
+
+async def fetch_all_pages(state: str, limit: int):
+    all_items, x = [], 0
+    while True:
+        page = await fetch_orders(state, limit, limit * x)
+        all_items += page
+        if len(page) < limit:
+            return all_items
+        x += 1
+
+async def calling_orders(state: str, limit: int):
+    while True:
+        try:
+            raw = await fetch_all_pages(state, limit) # Ok
+            data = [flatten_order(item) for item in raw] # Ok
+            unique_data = list({item["tracking_code"]: item for item in data}.values()) # Ok
+            new_tcs = {str(item["tracking_code"]) for item in unique_data} # Ok
+            await database_process_orders(unique_data, new_tcs, state) # Cheking
+            return
+        except Exception as e:
+            print(f"{state} list Error: {e}")
+
+# endregion
+
 # region paid order detail
 
 async def get_paid_detail(semaphore_paid_detail,uid):
@@ -491,13 +569,7 @@ def search_agent_in_auth_user():
 
 
 # region agents issuing counts
-# class GroupConcat(Aggregate):
-#     function = "GROUP_CONCAT"
-#     template = "%(function)s(%(expressions)s, '%(separator)s')"
-#     output_field = CharField()
 
-#     def __init__(self, expression, separator=", ", **extra):
-#         super().__init__(expression, separator=separator, **extra)
 
 @sync_to_async
 def agents_issuing_counts():
@@ -796,75 +868,6 @@ def score():
 
 
 # region preassing
-# @sync_to_async
-# def preassing():
-#     from thirdparty.models import ThpIssuingOrder , ThpIssuingOrderLog
-#     from accounts.models import ProfileThpIssuingAgent , AuthUserBackOffice , WorkingInsuranceCompanies
-#     ThpIssuingOrder.objects.filter(state_name = "paid",chosen_issuing_agent_name__isnull=False).update(chosen_issuing_agent_name=None)
-
-#     paid_order_list =  ThpIssuingOrder.objects.filter(state_name="paid",score__isnull = False, chosen_issuing_agent_name__isnull = True).order_by("-score")
-
-#     if not paid_order_list:
-#         print("paid_order_list is empty")
-#         return
-    
-#     for item in paid_order_list:
-#         # print(item.score)
-        
-#         work_group_needed = ["fresh" if item.is_fresh else "secondary"]
-
-#         if item.assignment_status == "reassigned":
-#             excluded_agent_id = ThpIssuingOrderLog.objects.filter(tracking_code=item.tracking_code,assignment_status="reassigned").values("assigned_from_id")
-
-#             right_agents = (
-#                 ProfileThpIssuingAgent.objects
-#                 .filter(
-#                 person_name__isnull = False,
-#                 start_shift__lte=now_local_time(),
-#                 end_shift__gte=now_local_time(),
-#                 working_insurance_company__name=item.company_name,
-#                 working_category__name__in=work_group_needed,
-#                 capacity__gt=F("assigned_order"),
-#                 is_working = True , is_visible= True,
-#                 working_days__contains=[week_day()],
-#                 )
-#                 .exclude(id__in=excluded_agent_id)
-#                 .exclude(person_name="")
-#                 .order_by("assigned_order")
-#             )
-
-#         else:
-
-#             right_agents = (
-#                 ProfileThpIssuingAgent.objects
-#                 .filter(
-#                 person_name__isnull = False,
-#                 start_shift__lte=now_local_time(),
-#                 end_shift__gte=now_local_time(),
-#                 working_insurance_company__name=item.company_name,
-#                 working_category__name__in=work_group_needed,
-#                 capacity__gt=F("assigned_order"),
-#                 is_working = True , is_visible= True,
-#                 working_days__contains=[week_day()])
-#                 .exclude(person_name="")
-#                 .order_by("assigned_order")
-#             )
-
-#         agent = right_agents.first()
-#         # print(agent)
-#         if agent is None:
-#             continue
-        
-#         company_last_name = WorkingInsuranceCompanies.objects.filter(name=item.company_name).first()
-#         auth_user_company_id = AuthUserBackOffice.objects.filter(first_name=agent.person_name, last_name = company_last_name.last_name).first()
-
-#         with transaction.atomic():
-#             item.chosen_issuing_agent_name = agent
-#             item.chosen_issuing_agent_auth_user_id = auth_user_company_id.id
-#             agent.assigned_order = F("assigned_order") + 1  
-#             item.save()
-#             agent.save()
-#             agent.refresh_from_db()
 
 @sync_to_async
 def preassing():
@@ -1133,22 +1136,15 @@ async def main_thp_issuing_assignment():
     code = random.randint(100000, 999999)
     print(f"start task- {code} {now_local_time()}" )
 
-    present_agents = await get_present_agents()
-    if not present_agents:
-        print("No present agents Stoping code-----------------------------------------")
+    if not await get_present_agents():
+        print("No present agents")
         return
     
-    await asyncio.gather(
-        calling_issuing_list(limit=1000),
-        calling_paid_list(limit=1000),
-    )
+    # await asyncio.gather(calling_issuing_list(limit=1000),calling_paid_list(limit=1000),)
+    await asyncio.gather(calling_orders("issuing", limit=1000),calling_orders("paid", limit=1000),)
 
     await search_agent_in_auth_user()
-    
-    await asyncio.gather(
-        calling_issuing_order_detail(),
-        calling_paid_order_detail(),
-    )
+    await asyncio.gather(calling_issuing_order_detail(),calling_paid_order_detail(),)
     await agents_issuing_counts()
     await find_reassine()
     await score()
@@ -1188,8 +1184,8 @@ redis_client = redis.Redis(host="redis-bb", port=6379, db=0)
 
 
 LOCK_NAME = "thp_issuing_assignment"
-LOCK_TIMEOUT = 600          # اگه هیچ چیزی تمدیدش نکنه، حداکثر این‌قدر زنده می‌مونه
-EXTEND_INTERVAL = 200        # هر ۲۰۰ ثانیه یک‌بار تمدید کن (کمتر از تایم‌اوت)
+LOCK_TIMEOUT = 600
+EXTEND_INTERVAL = 200
 
 
 @shared_task
